@@ -13,6 +13,7 @@ PAGE = """
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="google-site-verification" content="e99qwkjj1EY6rG7uSWiXUjNCP59NSnEjnYuJ3VTMfoA" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>أَثَر AI</title>
 <style>
