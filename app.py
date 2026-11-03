@@ -99,6 +99,21 @@ footer { color: #aebbd0; padding: 25px; }
 """
 
 
+@app.route("/robots.txt")
+def robots():
+    return "User-agent: *\nAllow: /\nSitemap: https://athar-ai-4ir3.onrender.com/sitemap.xml\n", 200, {"Content-Type": "text/plain; charset=utf-8"}
+
+@app.route("/sitemap.xml")
+def sitemap():
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://athar-ai-4ir3.onrender.com/</loc>
+  </url>
+</urlset>"""
+    return xml, 200, {"Content-Type": "application/xml; charset=utf-8"}
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     answer = ""
