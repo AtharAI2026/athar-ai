@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+import os
+import json
+import urllib.request
+import urllib.error
+load_dotenv()
 from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
@@ -91,16 +97,72 @@ footer { color: #aebbd0; padding: 25px; }
 </html>
 """
 
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     answer = ""
+
     if request.method == "POST":
         question = request.form.get("question", "").strip()
+
         if question:
-            answer = (
-                "وصل سؤالك بنجاح! هذه نسخة أولية من أَثَر AI. "
-                "نعمل الآن على تطوير قدراته ليشرح الدروس ويجيب عن الأسئلة."
-            )
+            api_key = os.getenv("GROQ_API_KEY")
+
+            if not api_key:
+                answer = "مفتاح الذكاء الاصطناعي غير مضبوط في إعدادات الخادم."
+            else:
+                payload = {
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": (
+                                "أنت أَثَر AI، مساعد تعليمي عربي. "
+                                "ساعد الطلاب على فهم دروسهم، "
+                                "واشرح المعلومات بوضوح وبأسلوب مبسط، "
+                                "واستخدم أمثلة مناسبة لمستواهم الدراسي. "
+                                "أجب باللغة العربية ما لم يطلب المستخدم لغة أخرى."
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": question
+                        }
+                    ],
+                    "temperature": 0.4,
+                    "max_tokens": 1200
+                }
+
+                req = urllib.request.Request(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={
+                        "Authorization": "Bearer " + api_key,
+                        "Content-Type": "application/json"
+                    },
+                    method="POST"
+                )
+
+                try:
+                    with urllib.request.urlopen(req, timeout=60) as response:
+                        result = json.loads(response.read().decode("utf-8"))
+
+                    answer = result["choices"][0]["message"]["content"].strip()
+
+                except urllib.error.HTTPError as e:
+                    print("Groq HTTP error:", e.code)
+
+                    if e.code == 401:
+                        answer = "تعذر التحقق من مفتاح الذكاء الاصطناعي. راجع إعدادات المفتاح."
+                    elif e.code == 429:
+                        answer = "طلبات كثيرة حاليًا. حاول مجددًا بعد قليل."
+                    else:
+                        answer = "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. حاول مجددًا."
+
+                except Exception as e:
+                    print("Groq connection error:", type(e).__name__)
+                    answer = "تعذر الاتصال بالذكاء الاصطناعي حاليًا. حاول مجددًا."
+
     return render_template_string(PAGE, answer=answer)
 
 if __name__ == "__main__":
