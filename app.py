@@ -112,7 +112,7 @@ def home():
                 answer = "مفتاح الذكاء الاصطناعي غير مضبوط في إعدادات الخادم."
             else:
                 payload = {
-                    "model": "llama-3.3-70b-versatile",
+                    "model": "qwen/qwen3.8-27b",
                     "messages": [
                         {
                             "role": "system",
@@ -138,7 +138,8 @@ def home():
                     data=json.dumps(payload).encode("utf-8"),
                     headers={
                         "Authorization": "Bearer " + api_key,
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+            "User-Agent": "AtharAI/1.0"
                     },
                     method="POST"
                 )
