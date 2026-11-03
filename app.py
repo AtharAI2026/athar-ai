@@ -15,7 +15,20 @@ PAGE = """
 <meta charset="UTF-8">
 <meta name="google-site-verification" content="e99qwkjj1EY6rG7uSWiXUjNCP59NSnEjnYuJ3VTMfoA" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>أَثَر AI</title>
+
+<title>أَثَر AI | مساعدك التعليمي الذكي</title>
+<meta name="description" content="أَثَر AI مساعد تعليمي ذكي يساعد الطلاب على فهم الدروس والمواد الدراسية من خلال شروحات مبسطة وأمثلة وأسئلة تعليمية تفاعلية باللغة العربية.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://athar-ai-4ir3.onrender.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="أَثَر AI | مساعدك التعليمي الذكي">
+<meta property="og:description" content="تعلم وافهم دروسك بسهولة مع أَثَر AI، مساعدك التعليمي الذكي.">
+<meta property="og:url" content="https://athar-ai-4ir3.onrender.com/">
+<meta property="og:locale" content="ar_AR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="أَثَر AI">
+<meta name="twitter:description" content="مساعدك التعليمي الذكي لفهم الدروس باللغة العربية.">
 <style>
 body {
     margin: 0;
@@ -72,6 +85,32 @@ button {
     line-height: 1.8;
 }
 footer { color: #aebbd0; padding: 25px; }
+
+.founder-card {
+    background: linear-gradient(145deg, #202f4c, #17243b);
+    border: 1px solid #d6ad55;
+    border-radius: 18px;
+    padding: 24px;
+    margin: 25px auto;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+.founder-card h2 {
+    color: #f1ca70;
+    font-size: 23px;
+    margin-bottom: 12px;
+}
+.founder-name {
+    color: #f1ca70;
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1.8;
+}
+.founder-card p {
+    color: #d5dbea;
+    line-height: 2;
+    font-size: 16px;
+}
+
 </style>
 </head>
 <body>
@@ -80,6 +119,31 @@ footer { color: #aebbd0; padding: 25px; }
 <p class="subtitle">تعلّم بذكاء، اصنع أثرًا</p>
 </header>
 <main>
+
+<div class="founder-card">
+    <h2>صاحبة فكرة ومؤسسة أثر AI</h2>
+    <div class="founder-name">المهندسة مريم محمود حسن الحاج</div>
+    <p>
+        خبيرة وصاحبة رؤية طموحة، جمعت بين الإبداع التقني
+        والإيمان برسالة التعليم، لتطلق فكرة أثر AI وتسعى
+        إلى توظيف الذكاء الاصطناعي في خدمة الطلاب.
+    </p>
+    <p>
+        انطلقت فكرة المشروع من إيمانها بأن كل طالب يستحق
+        فرصة أفضل للفهم والتعلم، وأن التكنولوجيا يمكن أن
+        تجعل المعرفة أقرب وأسهل وأكثر تفاعلاً.
+    </p>
+    <p>
+        تهدف رؤيتها إلى بناء مساعد تعليمي ذكي باللغة العربية،
+        يشرح الدروس، ويبسط المفاهيم، ويساعد الطلاب على اكتشاف
+        قدراتهم وتحقيق طموحاتهم.
+    </p>
+    <p>
+        <strong>أثر AI: لأن العلم لا يقتصر على الإجابة،
+        بل يصنع أثراً يبقى في المستقبل.</strong>
+    </p>
+</div>
+
 <div class="card">
 <h2>مرحبًا بك في مساعدك الدراسي</h2>
 <p>اكتب سؤالك الدراسي وسنبدأ رحلة التعلّم معًا.</p>
