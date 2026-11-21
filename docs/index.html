@@ -226,7 +226,7 @@ form.addEventListener("submit", async function(event) {
         store.chats = store.chats.sort(function(a, b) { return b.updated - a.updated; }).slice(0, 99);
         store.current = c.id;
     }
-    const history = c.msgs.slice(-8).map(function(m) { return {role: m.r, content: m.t}; });
+    const history = c.msgs.slice(-70).map(function(m) { return {role: m.r, content: m.t}; });
     c.msgs.push({r: "user", t: question});
     c.updated = Date.now();
     save(); renderMessages(); renderList();
