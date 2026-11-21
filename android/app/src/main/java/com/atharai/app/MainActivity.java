@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
 
         setContentView(webView);
 
-        webView.loadUrl("https://athar-ai-4ir3.onrender.com");
+        webView.loadUrl("https://atharai2026.github.io/athar-ai/");
     }
 
     @Override
