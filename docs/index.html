@@ -5,6 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>أثر AI | مساعدك التعليمي الذكي</title>
 <link rel="stylesheet" href="static/style.css">
+<style>
+.chat-heading{display:flex;align-items:center;gap:12px}
+.head-actions{margin-inline-start:auto;display:flex;gap:8px}
+.icon-btn{width:42px;height:42px;border-radius:14px;border:1px solid rgba(160,125,70,.3);background:rgba(255,255,255,.7);color:#70542e;font:inherit;font-size:18px;cursor:pointer}
+.icon-btn:focus-visible,.chat-item button:focus-visible,.new-chat:focus-visible{outline:2px solid #9b7136;outline-offset:2px}
+.scrim{position:fixed;inset:0;background:rgba(60,45,25,.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.drawer{position:fixed;top:0;bottom:0;right:0;width:min(86vw,340px);background:#fbf5e8;box-shadow:-8px 0 30px rgba(90,65,30,.25);transform:translateX(105%);visibility:hidden;transition:transform .25s,visibility 0s .25s;z-index:50;display:flex;flex-direction:column;padding:18px 14px;font-family:inherit;color:#554936}
+body.drawer-open .drawer{transform:none;visibility:visible;transition-delay:0s}
+body.drawer-open .scrim{opacity:1;pointer-events:auto}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.drawer-head strong{font-size:18px}
+.new-chat{width:100%;padding:12px;border:0;border-radius:16px;background:linear-gradient(145deg,#d9b976,#9b7136);color:#fffdf7;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
+.chat-list{list-style:none;margin:14px 0 0;padding:0;overflow-y:auto;flex:1}
+.chat-item{display:flex;align-items:center;gap:6px;border-radius:14px;padding:2px}
+.chat-item.active{background:rgba(217,185,118,.28)}
+.chat-item .open{flex:1;min-width:0;text-align:start;background:none;border:0;font:inherit;color:inherit;padding:10px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-item .del{background:none;border:0;font:inherit;font-size:13px;color:#927d5d;padding:8px 10px;border-radius:10px;cursor:pointer}
+.chat-item .del.confirm{background:#a8553a;color:#fff}
+.empty{color:#927d5d;font-size:14px;padding:12px;line-height:1.8}
+@media (prefers-reduced-motion:reduce){.drawer,.scrim{transition:none}}
+/* full-screen chat */
+html,body{height:100%}
+body{overflow:hidden}
+.app-shell{width:100%;height:100vh;height:100dvh;margin:0;padding:8px 10px;border-radius:0;border:0;display:flex;flex-direction:column;box-shadow:none}
+.topbar{padding:2px 4px 8px}
+.workspace{flex:1;min-height:0;width:100%;max-width:720px;margin:0 auto;display:flex;flex-direction:column}
+.chat-panel{flex:1;min-height:0;display:flex;flex-direction:column;margin:0;padding:12px}
+.messages{flex:1;min-height:0;max-height:none}
+.chat-panel .privacy-note{margin:8px 0 0;font-size:11px;text-align:center}
+.about{position:fixed;inset:0;z-index:60;overflow-y:auto;display:none;padding:14px;background:linear-gradient(135deg,#f8f0e2,#e8d7b9)}
+body.about-open .about{display:block}
+#about-body{display:flex;flex-direction:column;gap:22px;max-width:720px;margin:12px auto 0}
+.about-btn{margin-top:10px;width:100%;padding:11px;border-radius:14px;border:1px solid rgba(160,125,70,.35);background:rgba(255,255,255,.7);color:#70542e;font:inherit;font-weight:600;cursor:pointer}
+</style>
 </head>
 <body>
 <div class="ambient ambient-one"></div>
@@ -50,6 +84,10 @@
                     <strong>محادثتك مع أثر</strong>
                     <small>مساعدك التعليمي الذكي</small>
                 </div>
+                <div class="head-actions">
+                    <button type="button" class="icon-btn" id="btn-new" aria-label="محادثة جديدة">＋</button>
+                    <button type="button" class="icon-btn" id="btn-history" aria-label="المحادثات السابقة">☰</button>
+                </div>
             </div>
 
             <div class="messages" id="messages">
@@ -81,10 +119,32 @@
     <footer>أَثَر AI — لأن العلم يستحق أثراً</footer>
 </div>
 
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="المحادثات السابقة">
+    <div class="drawer-head"><strong>محادثاتك</strong><button type="button" class="icon-btn" id="btn-close" aria-label="إغلاق">✕</button></div>
+    <button type="button" class="new-chat" id="btn-new2">＋ محادثة جديدة</button>
+    <ul class="chat-list" id="chat-list"></ul>
+    <button type="button" class="about-btn" id="btn-about">عن أثر وقصة الفكرة</button>
+</aside>
+
+<div class="about" id="about"><button type="button" class="icon-btn" id="about-close" aria-label="إغلاق">✕</button><div id="about-body"></div></div>
+
 <script>
+const KEY = "athar_chats_v2";
+const API = "https://athar-ai-api.kmj142019.workers.dev";
+const GREETING = 'مرحباً! أنا أثر، مساعدك التعليمي. 🌟<br>ما الدرس الذي تريد أن نفهمه معاً اليوم؟';
 const form = document.getElementById("chat-form");
 const input = document.getElementById("question");
 const messages = document.getElementById("messages");
+const listEl = document.getElementById("chat-list");
+let store = {chats: [], current: null};
+try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && Array.isArray(s.chats)) store = s;
+} catch (e) {}
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+function getChat(id) { return store.chats.find(function(c) { return c.id === id; }); }
 
 function addMessage(text, type) {
     const row = document.createElement("div");
@@ -97,35 +157,112 @@ function addMessage(text, type) {
     messages.scrollTop = messages.scrollHeight;
 }
 
+function renderMessages() {
+    messages.innerHTML = "";
+    const c = getChat(store.current);
+    if (!c || !c.msgs.length) {
+        const row = document.createElement("div");
+        row.className = "message assistant";
+        row.innerHTML = '<div class="bubble">' + GREETING + '</div>';
+        messages.appendChild(row);
+    } else {
+        c.msgs.forEach(function(m) { addMessage(m.t, m.r); });
+    }
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function removeChat(id) {
+    store.chats = store.chats.filter(function(c) { return c.id !== id; });
+    if (store.current === id) store.current = null;
+    save(); renderMessages(); renderList();
+}
+
+function renderList() {
+    listEl.innerHTML = "";
+    if (!store.chats.length) {
+        const li = document.createElement("li");
+        li.className = "empty";
+        li.textContent = "لا توجد محادثات بعد. اكتب سؤالك الأول وستظهر هنا.";
+        listEl.appendChild(li);
+        return;
+    }
+    store.chats.slice().sort(function(a, b) { return b.updated - a.updated; }).forEach(function(c) {
+        const li = document.createElement("li");
+        li.className = "chat-item" + (c.id === store.current ? " active" : "");
+        const open = document.createElement("button");
+        open.type = "button"; open.className = "open"; open.textContent = c.title;
+        open.onclick = function() { store.current = c.id; save(); renderMessages(); renderList(); setDrawer(false); };
+        const del = document.createElement("button");
+        del.type = "button"; del.className = "del"; del.textContent = "حذف";
+        del.setAttribute("aria-label", "حذف المحادثة");
+        del.onclick = function() {
+            if (del.classList.contains("confirm")) { removeChat(c.id); return; }
+            del.classList.add("confirm"); del.textContent = "تأكيد الحذف";
+            setTimeout(function() { del.classList.remove("confirm"); del.textContent = "حذف"; }, 3000);
+        };
+        li.appendChild(open); li.appendChild(del);
+        listEl.appendChild(li);
+    });
+}
+
+function setDrawer(open) { document.body.classList.toggle("drawer-open", open); }
+function newChat() { store.current = null; save(); renderMessages(); renderList(); setDrawer(false); input.focus(); }
+document.getElementById("btn-history").onclick = function() { setDrawer(true); };
+document.getElementById("btn-close").onclick = function() { setDrawer(false); };
+document.getElementById("scrim").onclick = function() { setDrawer(false); };
+document.getElementById("btn-new").onclick = newChat;
+document.getElementById("btn-new2").onclick = newChat;
+document.addEventListener("keydown", function(e) { if (e.key === "Escape") setDrawer(false); });
+
 form.addEventListener("submit", async function(event) {
     event.preventDefault();
     const question = input.value.trim();
     if (!question) return;
 
-    addMessage(question, "user");
+    let c = getChat(store.current);
+    if (!c) {
+        c = {id: "c" + Date.now(), title: question.slice(0, 40), updated: Date.now(), msgs: []};
+        store.chats.push(c);
+        store.chats = store.chats.sort(function(a, b) { return b.updated - a.updated; }).slice(0, 30);
+        store.current = c.id;
+    }
+    const history = c.msgs.slice(-8).map(function(m) { return {role: m.r, content: m.t}; });
+    c.msgs.push({r: "user", t: question});
+    c.updated = Date.now();
+    save(); renderMessages(); renderList();
+
     input.value = "";
     input.disabled = true;
-
     const loading = document.createElement("div");
     loading.className = "message assistant";
     loading.innerHTML = '<div class="bubble typing">أثر يكتب الآن...</div>';
     messages.appendChild(loading);
     messages.scrollTop = messages.scrollHeight;
 
+    let answer = "", ok = false;
     try {
-        const response = await fetch("https://athar-ai-api.kmj142019.workers.dev", {
+        const response = await fetch(API, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({question: question})
+            body: JSON.stringify({question: question, history: history})
         });
         const data = await response.json();
-        loading.remove();
-        addMessage(data.answer || "تعذر الحصول على إجابة.", "assistant");
+        answer = data.answer || "تعذر الحصول على إجابة.";
+        ok = response.ok;
     } catch (error) {
-        loading.remove();
-        addMessage("حدث خطأ في الاتصال. حاول مرة أخرى.", "assistant");
+        answer = "حدث خطأ في الاتصال. حاول مرة أخرى.";
     }
+    loading.remove();
 
+    if (ok && getChat(c.id)) {
+        c.msgs.push({r: "assistant", t: answer});
+        if (c.msgs.length > 60) c.msgs = c.msgs.slice(-60);
+        c.updated = Date.now();
+        save(); renderList();
+    }
+    if (store.current === c.id) {
+        if (ok) renderMessages(); else addMessage(answer, "assistant");
+    }
     input.disabled = false;
     input.focus();
 });
@@ -136,6 +273,22 @@ input.addEventListener("keydown", function(event) {
         form.requestSubmit();
     }
 });
+
+const aboutBody = document.getElementById("about-body");
+[".welcome", ".founder-card", "footer"].forEach(function(s) {
+    const el = document.querySelector(s);
+    if (el) aboutBody.appendChild(el);
+});
+function setAbout(open) {
+    document.body.classList.toggle("about-open", open);
+    if (open) document.getElementById("about").scrollTop = 0;
+}
+document.getElementById("btn-about").onclick = function() { setDrawer(false); setAbout(true); };
+document.getElementById("about-close").onclick = function() { setAbout(false); };
+document.addEventListener("keydown", function(e) { if (e.key === "Escape") setAbout(false); });
+
+renderMessages();
+renderList();
 </script>
 </body>
 </html>
