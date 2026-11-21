@@ -256,7 +256,7 @@ form.addEventListener("submit", async function(event) {
 
     if (ok && getChat(c.id)) {
         c.msgs.push({r: "assistant", t: answer});
-        if (c.msgs.length > 60) c.msgs = c.msgs.slice(-60);
+        if (c.msgs.length > 200) c.msgs = c.msgs.slice(-200);
         c.updated = Date.now();
         save(); renderList();
     }
